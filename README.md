@@ -5,4 +5,6 @@ Basic yet cool DDoS API with some useful stuff.
 The configuration is very straight forward, so no need to talk about it.
 
 ## Run
-```pip install -r requirements.txt && chmod +x run.sh && bash run.sh```
+```
+pip install -r requirements.txt && chmod +x run.sh && bash run.sh
+```

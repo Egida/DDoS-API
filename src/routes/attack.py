@@ -14,7 +14,7 @@ from ..utils.ratelimiter import ratelimiter
 with open("config/config.yml", "r") as f:
     config = yaml.safe_load(f)
 
-methods = ["TCP"]
+methods = ["TCP", "HTTPS"]
 
 webhook_url = config['config']['webhook']
 webhook = DiscordWebhook(url=webhook_url)
@@ -70,7 +70,7 @@ async def attack(request: Request):
         if host in blocked_ips:
             return Response(json.dumps({"success": False, "error": "Host is blocked."}, indent=4), status_code=400)
         
-        if 'http' in host and method not in ["HTTPS", "BROWSER"]:
+        if 'http' in host and method not in ["HTTPS"]:
             return Response(json.dumps({"success": False, "error": "You inserted an URL with a L4 method, which is not allowed."}, indent=4), status_code=400)
 
         if concurrents > (await check_key_in_db("user", user))['concurrents']:
@@ -87,7 +87,7 @@ async def attack(request: Request):
 
         threading.Thread(target=slot_append, args=[user]).start()
 
-        method_urls = {"TCP": "https://example.com"}
+        method_urls = {"TCP": "https://example.com", "HTTPS": "https://example.com"}
 
         for _ in range(concurrents):
             for url in set(method_urls[method.lower()]):

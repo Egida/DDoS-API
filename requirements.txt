@@ -1,0 +1,8 @@
+starlette
+httpx
+discord-webhook
+uvicorn
+motor
+pyrate-limiter
+pyyaml
+uvloop

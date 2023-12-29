@@ -1,0 +1,4 @@
+config:
+  mongo_url: ""
+  admin_key: ""
+  webhook: ""

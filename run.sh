@@ -1,0 +1,1 @@
+screen uvicorn src.main:app --workers 6 --loop uvloop

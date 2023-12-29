@@ -90,7 +90,7 @@ async def attack(request: Request):
         method_urls = {"TCP": ["https://example.com"], "HTTPS": ["https://example.com"]}
 
         for _ in range(concurrents):
-            for url in set(method_urls[method.lower()]):
+            for url in set(method_urls[method]):
                 threading.Thread(target=send_request, args=[url]).start()
 
         embed = DiscordEmbed(title="Example API - Attack Sent", color="2d6bda")

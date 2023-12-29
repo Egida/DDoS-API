@@ -4,7 +4,7 @@ Basic yet cool DDoS API with some useful stuff.
 ## Requirements
 - Python
 - MongoDB database
-- Brain
+- 1 brain cell
 
 ## Configuration
 The configuration is very straight forward, so no need to talk about it.

@@ -87,7 +87,7 @@ async def attack(request: Request):
 
         threading.Thread(target=slot_append, args=[user]).start()
 
-        method_urls = {"TCP": "https://example.com", "HTTPS": "https://example.com"}
+        method_urls = {"TCP": ["https://example.com"], "HTTPS": ["https://example.com"]}
 
         for _ in range(concurrents):
             for url in set(method_urls[method.lower()]):

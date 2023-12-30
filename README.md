@@ -1,20 +1,25 @@
 # DDoS API
-Basic yet cool DDoS API with some useful stuff.
+
+Welcome to the DDoS API, a simple yet powerful tool with some useful features.
 
 ## Requirements
-- Python (I recommend Python 3.9+)
+Make sure you have the following before getting started:
+- Python (Python 3.9+ recommended)
 - MongoDB database
-- 1 brain cell
+- At least 1 functioning brain cell
 
 ## Configuration
-The configuration is very straight forward, so no need to talk about it.
+The configuration is straightforward; no need for an elaborate discussion.
 
 ## Features
-- Attacking endpoint protected with user & key authentication, and that includes a concurrent and slot system.
-- Admin endpoint for adding, removing, checking and updating users in the database.
-- A methods endpoint.
+Explore the following features:
+- Attacking endpoint protected with user and key authentication, featuring a concurrent and slot system.
+- Admin endpoint for managing users in the database, including adding, removing, checking, and updating functionalities.
+- A methods endpoint for various operations.
 
-## Run
-```
-pip install -r requirements.txt && chmod +x run.sh && bash run.sh
-```
+## How to Run
+Execute the following commands to set up and run the DDoS API:
+```bash
+pip install -r requirements.txt
+chmod +x run.sh
+bash run.sh

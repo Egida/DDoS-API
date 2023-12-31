@@ -17,7 +17,7 @@ Explore the following features:
 - Admin endpoint for managing users in the database, including adding, removing, checking, and updating functionalities.
 - A methods endpoint for various operations.
 
-## WARNING
+## Disclaimer
 I do not condone this for illegal actions, this is for educational and legal purposes. (thank you, Visivel, because I forgot to put this here)
 
 ## How to Run

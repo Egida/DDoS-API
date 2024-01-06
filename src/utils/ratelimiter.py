@@ -1,10 +1,11 @@
-from pyrate_limiter import Duration, Rate, Limiter, BucketFullException
+from pyrate_limiter import Limiter, Rate
+from asyncer import asyncify
 
-limiter = Limiter(Rate(3, Duration.MINUTE))
+limiter = Limiter(Rate(5, 60))
 
-def ratelimiter(key):
+async def ratelimiter(key):
     try:
-        limiter.try_acquire(key)
+        await asyncify(limiter.try_acquire)(key)
         return True
-    except BucketFullException:
+    except:
         return False

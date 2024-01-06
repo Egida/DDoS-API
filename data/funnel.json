@@ -1,0 +1,28 @@
+{
+    "methods": {
+        "TCP": {
+            "description": "Example",
+            "apiList": [
+                "https://api1.example.com/api/attack?host=<<$host>>&port=<<$port>>&time=<<$time>>",
+                "https://api2.example.com/api/attack?host=<<$host>>&port=<<$port>>&time=<<$time>>"
+            ],
+            "maximumTime": 120,
+            "premium": true,
+            "slots": 3,
+            "maximumConcurrents": 2,
+            "type": "l4"
+        },
+        "UDP": {
+            "description": "Example",
+            "apiList": [
+                "https://api1.example.com/api/attack?host=<<$host>>&port=<<$port>>&time=<<$time>>",
+                "https://api2.example.com/api/attack?host=<<$host>>&port=<<$port>>&time=<<$time>>"
+            ],
+            "maximumTime": 120,
+            "premium": true,
+            "slots": 3,
+            "maximumConcurrents": 2,
+            "type": "l4"
+        }
+    }
+}

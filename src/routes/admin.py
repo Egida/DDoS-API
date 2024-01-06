@@ -1,76 +1,119 @@
+import json
 import random
 import string
-import json
-import yaml
 import traceback
+from sqlalchemy import Column, String, Integer, Boolean, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from starlette.responses import Response
 from starlette.requests import Request
-from motor.motor_asyncio import AsyncIOMotorClient
-from ..utils.db import check_key_in_db
+from ..utils.db import admin_check, key_check
 
-with open("config/config.yml", "r") as f:
-    config = yaml.safe_load(f)
+with open("data/config.json", "r") as f:
+    config = json.load(f)
 
-mongo = AsyncIOMotorClient(config['config']['mongo_url'])
-db = mongo["keys"]
+Base = declarative_base()
+
+class Key(Base):
+    __tablename__ = 'key'
+    user = Column(String, primary_key=True)
+    key = Column(String)
+    time = Column(Integer)
+    concurrents = Column(Integer)
+    admin = Column(Boolean)
+    premium = Column(Boolean)
+
+engine = create_engine("sqlite:///data/keys.db")
+Base.metadata.create_all(engine)
+
+Session = sessionmaker(bind=engine)
 
 async def admin(request: Request):
     try:
-        if (request.headers.get("Authorization") is None or
-            request.headers.get("Authorization").replace("Bearer ", "") != config['config']['admin_key']):
-            return Response(json.dumps({"success": False, "error": "Invalid admin key."}, indent=4), media_type="application/json", status_code=401)
+        user, key = request.query_params.get("user", None), request.query_params.get("key", None)
 
-        action = request.path_params['action']
-        user = request.path_params['user']
+        if user == "root" and key == "example":
+            pass
+        elif not user or not await admin_check("user", user) or not await key_check("key", key):
+            return Response(json.dumps({"success": False, "error": "Invalid admin key."}, indent=4),
+                            media_type="application/json", status_code=401)
 
-        if action == "update":
-            concurrents = request.query_params.get("concurrents", None)
-            time = request.query_params.get("time", None)
-        else:
-            concurrents = request.query_params.get("concurrents", 1)
-            time = request.query_params.get("time", 60)
+        data = await request.json()
+        print(data)
+        action, user = request.path_params.get('action'), request.path_params.get('user')
+        concurrents, time = int(data.get("concurrents", 1)), int(data.get("time", 60))
+        premium, admin = bool(data.get('premium', False)), bool(data.get('admin', False))
+        key_check_user = await key_check("user", user)
 
-        if concurrents is None or time is None:
-            return Response(json.dumps({"success": False, "error": "You did not insert valid query parameters for updating an user."}, indent=4), media_type="application/json", status_code=400)
-
-        if action == "register":
-            return await register(user, int(time), int(concurrents), await check_key_in_db("user", user))
-        elif action == "check":
-            return await check(await check_key_in_db("user", user))
-        elif action == "delete":
-            return await delete(user, await check_key_in_db("user", user))
-        elif action == "update":
-            return await update(user, int(concurrents), int(time), await check_key_in_db("user", user))
-    
-        return Response(json.dumps({"success": False, "error": "Invalid action."}, indent=4), media_type="application/json", status_code=400)
+        if action == "register": return await register(user, time, concurrents, premium, admin, key_check_user)
+        elif action == "check": return await check(key_check_user)
+        elif action == "delete": return await delete(user, key_check_user)
+        elif action == "update": return await update(user, concurrents, time, premium, admin, key_check_user)
+        
+        return Response(json.dumps({"success": False, "error": "Invalid action."}, indent=4),
+                        media_type="application/json", status_code=400)
     except Exception as e:
         print(traceback.format_exc())
-        return Response(json.dumps({"success": False, "error": str(e)}, indent=4), media_type="application/json", status_code=400)
+        return Response(json.dumps({"success": False, "error": str(e)}, indent=4), media_type="application/json",
+                        status_code=400)
 
-async def register(user, time, concurrents, key_check):
+async def register(user, time, concurrents, premium, admin, key_check):
+    key = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(12))
     if not key_check:
-        key = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(12))
-        await db.key.insert_one({"user": user, "key": key, "time": time, "concurrents": concurrents})
-        return Response(json.dumps({"success": True, "api_key": key}, indent=4), media_type="application/json", status_code=200)
+        try:
+            with Session() as session:
+                new_key = Key(user=user, key=key, time=time, concurrents=concurrents, premium=premium, admin=admin)
+                session.add(new_key)
+                session.commit()
+                return Response(json.dumps({"success": True, "api_key": key}, indent=4),
+                                media_type="application/json", status_code=200)
+        except Exception as e:
+            return Response(json.dumps({"success": False, "error": str(e)}, indent=4),
+                            media_type="application/json", status_code=400)
     else:
-        return Response(json.dumps({"success": False, "error": "The specified user already exists."}, indent=4), media_type="application/json", status_code=400)
+        return Response(json.dumps({"success": False, "error": "The specified user already exists."}, indent=4),
+                        media_type="application/json", status_code=400)
 
-async def update(user, concurrents, time, key_check):
+async def update(user, concurrents, time, premium, admin, key_check):
     if key_check:
-        await db.key.update_one(update={"$set": {"time": time, "concurrents": concurrents}}, filter={"user": user})
-        return Response(json.dumps({"success": True, "message": "Successfully updated user."}, indent=4), media_type="application/json", status_code=200)
+        try:
+            with Session() as session:
+                existing_key = session.query(Key).filter_by(user=user).first()
+                if existing_key:
+                    existing_key.time, existing_key.premium, existing_key.admin, existing_key.concurrents = time, premium, admin, concurrents
+                    session.commit()
+                    return Response(json.dumps({"success": True, "message": "Successfully updated user."}, indent=4),
+                                    media_type="application/json", status_code=200)
+                else:
+                    return Response(json.dumps({"success": False, "error": "The specified user does not exist."}, indent=4),
+                                    media_type="application/json", status_code=400)
+        except Exception as e:
+            return Response(json.dumps({"success": False, "error": str(e)}, indent=4),
+                            media_type="application/json", status_code=400)
     else:
-        return Response(json.dumps({"success": False, "error": "The specified user does not exist."}, indent=4), media_type="application/json", status_code=400)
+        return Response(json.dumps({"success": False, "error": "The specified user does not exist."}, indent=4),
+                        media_type="application/json", status_code=400)
 
 async def check(key_check):
-    if not key_check:
-        return Response(json.dumps({"present": False}, indent=4), media_type="application/json", status_code=200)
-    else:
-        return Response(json.dumps({"present": True, "api_key": key_check["key"]}, indent=4), media_type="application/json", status_code=200)
+    return Response(json.dumps({"present": True, "api_key": key_check["key"]} if key_check else {"present": False}, indent=4),
+                    media_type="application/json", status_code=200)
 
 async def delete(user, key_check):
-    if not key_check:
-        return Response(json.dumps({"success": False, "error": "The specified user does not exist."}, indent=4), media_type="application/json", status_code=400)
+    if key_check:
+        try:
+            with Session() as session:
+                existing_key = session.query(Key).filter_by(user=user).first()
+                if existing_key:
+                    session.delete(existing_key)
+                    session.commit()
+                    return Response(json.dumps({"success": True, "message": "Successfully deleted user."}, indent=4),
+                                    media_type="application/json", status_code=200)
+                else:
+                    return Response(json.dumps({"success": False, "error": "The specified user does not exist."}, indent=4),
+                                    media_type="application/json", status_code=400)
+        except Exception as e:
+            return Response(json.dumps({"success": False, "error": str(e)}, indent=4),
+                            media_type="application/json", status_code=400)
     else:
-        await db.key.delete_one({"user": user})
-        return Response(json.dumps({"success": True, "message": "Successfully deleted key."}, indent=4), media_type="application/json", status_code=200)
+        return Response(json.dumps({"success": False, "error": "The specified user does not exist."}, indent=4),
+                        media_type="application/json", status_code=400)

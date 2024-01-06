@@ -1,0 +1,7 @@
+{
+    "config": {
+        "discordWebhook": "",
+        "rootAdminUser": "root",
+        "rootAdminKey": "example"
+    }
+}

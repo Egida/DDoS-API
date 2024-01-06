@@ -1,1 +1,1 @@
-screen uvicorn src.main:app --workers 6 --loop uvloop
+uvicorn src.main:app --port 80

@@ -4,7 +4,7 @@ Welcome to the DoS API, a simple yet cool API with some useful features.
 
 ## Requirements
 Make sure you have the following before getting started:
-- Python (Python 3.9+ recommended)
+- Python (3.9+ recommended)
 - At least 1 functioning brain cell
 
 ## Configuration

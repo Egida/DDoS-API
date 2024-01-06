@@ -1,6 +1,6 @@
 # DoS API
 
-Welcome to the DoS API, a simple yet powerful tool with some useful features.
+Welcome to the DoS API, a simple yet cool API with some useful features.
 
 ## Requirements
 Make sure you have the following before getting started:

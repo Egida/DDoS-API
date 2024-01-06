@@ -2,6 +2,7 @@ starlette
 httpx
 discord-webhook
 uvicorn
+uvloop
 pyrate-limiter
 aiosqlite
 asyncer

@@ -14,7 +14,7 @@ The configuration is straightforward; no need for an elaborate discussion.
 Explore the following features:
 - Attacking endpoint protected with user and key authentication, featuring a concurrent and slot system.
 - Admin endpoint for managing users in the database, including adding, removing, checking, and updating functionalities.
-- A methods endpoint for various operations.
+- A methods endpoint.
 
 ## Disclaimer
 I do not condone this for illegal actions, this is for educational and legal purposes.
